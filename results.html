@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Experiment Results</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #f6efe6;
+      --panel: rgba(255, 252, 247, 0.95);
+      --ink: #202724;
+      --muted: #67716c;
+      --line: #ddd5c9;
+      --shadow: 0 26px 60px rgba(35, 30, 25, 0.1);
+      --individual: #315645;
+      --small: #9a3412;
+      --large: #1d4ed8;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 24px;
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(154, 52, 18, 0.11), transparent 24%),
+        radial-gradient(circle at bottom right, rgba(29, 78, 216, 0.08), transparent 28%),
+        linear-gradient(180deg, #fcfaf6 0%, var(--bg) 100%);
+    }
+
+    .page {
+      width: min(100%, 1120px);
+      margin: 0 auto;
+      display: grid;
+      gap: 18px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid rgba(221, 213, 201, 0.92);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      padding: 28px;
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--muted);
+    }
+
+    h1, h2 {
+      margin: 0 0 10px;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .headline-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .score-boxes,
+    .summary-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .score-boxes {
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      margin-top: 18px;
+    }
+
+    .score-box,
+    .summary-card {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.78);
+      padding: 18px;
+    }
+
+    .score-box strong,
+    .summary-card h3 {
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .score-box strong {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+    }
+
+    .score-box span {
+      font-size: 1.5rem;
+      font-weight: 800;
+    }
+
+    .summary-grid {
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+
+    .metric {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 8px 0;
+      border-top: 1px solid rgba(221, 213, 201, 0.8);
+      color: var(--muted);
+    }
+
+    .metric:first-of-type {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .metric strong {
+      color: var(--ink);
+    }
+
+    .chart-wrap {
+      margin-top: 14px;
+    }
+
+    .insight {
+      margin-top: 16px;
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: rgba(49, 86, 69, 0.08);
+      border: 1px solid rgba(49, 86, 69, 0.15);
+      color: #244234;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 14px 20px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .primary {
+      background: linear-gradient(135deg, #9a3412, #c2410c);
+      color: #fff;
+    }
+
+    .secondary {
+      background: #fff;
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+
+    .empty {
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: rgba(154, 52, 18, 0.08);
+      border: 1px solid rgba(154, 52, 18, 0.16);
+      color: #7b2d12;
+    }
+
+    @media (max-width: 840px) {
+      .headline-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 12px;
+      }
+
+      .panel {
+        padding: 22px;
+      }
+
+      .actions {
+        display: grid;
+      }
+
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="panel">
+      <div class="headline-grid">
+        <div>
+          <p class="eyebrow">Experiment Results</p>
+          <h1 id="headline">Your session summary</h1>
+          <p id="intro-text">
+            The comparison below is based on your own trial data. In the group rounds, the score totals reflect how your decisions changed the shared team score.
+          </p>
+
+          <div class="score-boxes">
+            <div class="score-box">
+              <strong>Participant</strong>
+              <span id="participant-name">-</span>
+            </div>
+            <div class="score-box">
+              <strong>Questionnaire Total</strong>
+              <span id="questionnaire-total">-</span>
+            </div>
+            <div class="score-box">
+              <strong>Questionnaire Average</strong>
+              <span id="questionnaire-average">-</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="insight" id="insight-box">
+          Your interpretation will appear here after the app compares your
+          individual and group rounds.
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Condition Statistics</h2>
+      <div class="summary-grid" id="summary-grid"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Histogram of Your Trial Pumps</h2>
+      <p>
+        The chart below shows the frequency of your pump counts across the three
+        real conditions.
+      </p>
+      <div class="chart-wrap">
+        <canvas id="histogram-chart" height="140"></canvas>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Next Step</h2>
+      <p>
+        You can restart the experiment with a fresh sequence or return to the
+        opening page and keep your current participant identity.
+      </p>
+      <div class="actions">
+        <button class="primary" id="restart-button">Run Again</button>
+        <button class="secondary" id="home-button">Back to Entry Page</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const participant = JSON.parse(localStorage.getItem("bartParticipant") || "null");
+    const questionnaire = JSON.parse(localStorage.getItem("bartQuestionnaire") || "null");
+    const allTrials = JSON.parse(localStorage.getItem("bartTrials") || "[]");
+
+    const participantName = document.getElementById("participant-name");
+    const questionnaireTotal = document.getElementById("questionnaire-total");
+    const questionnaireAverage = document.getElementById("questionnaire-average");
+    const summaryGrid = document.getElementById("summary-grid");
+    const insightBox = document.getElementById("insight-box");
+    const restartButton = document.getElementById("restart-button");
+    const homeButton = document.getElementById("home-button");
+
+    const CONDITIONS = [
+      { key: "individual", label: "Individual", color: "#315645" },
+      { key: "small_group", label: "Group of 3", color: "#9a3412" },
+      { key: "large_group", label: "Group of 6", color: "#1d4ed8" }
+    ];
+
+    const realTrials = allTrials.filter((trial) => !trial.isPractice && trial.participantType === "human");
+
+    participantName.textContent = participant?.displayName || "Unknown";
+    questionnaireTotal.textContent = questionnaire ? questionnaire.totalScore.toFixed(2) : "-";
+    questionnaireAverage.textContent = questionnaire ? questionnaire.averageScore.toFixed(2) : "-";
+
+    function average(values) {
+      if (!values.length) {
+        return 0;
+      }
+      return values.reduce((sum, value) => sum + value, 0) / values.length;
+    }
+
+    function computeConditionSummary(conditionKey) {
+      const rows = realTrials.filter((trial) => trial.condition === conditionKey);
+      const nonPopped = rows.filter((trial) => !trial.popped);
+      const adjustedPumps = average(nonPopped.map((trial) => trial.pumps));
+      const popRate = rows.length ? rows.filter((trial) => trial.popped).length / rows.length : 0;
+      const averageCashOut = average(nonPopped.map((trial) => trial.points));
+      const totalScore = rows.reduce((sum, trial) => {
+        if (conditionKey === "individual") {
+          return sum + (trial.points || 0);
+        }
+        return sum + (trial.teamDelta || 0);
+      }, 0);
+
+      return {
+        rows,
+        adjustedPumps,
+        popRate,
+        averageCashOut,
+        totalScore
+      };
+    }
+
+    const summaries = CONDITIONS.map((condition) => ({
+      ...condition,
+      ...computeConditionSummary(condition.key)
+    }));
+
+    function renderSummaries() {
+      if (!realTrials.length) {
+        summaryGrid.innerHTML = `<div class="empty">No real-round trial data was found yet. Complete all rounds to see the final comparison.</div>`;
+        return;
+      }
+
+      summaryGrid.innerHTML = "";
+
+      summaries.forEach((summary) => {
+        const card = document.createElement("article");
+        card.className = "summary-card";
+        card.innerHTML = `
+          <h3 style="color: ${summary.color};">${summary.label}</h3>
+          <div class="metric"><span>Adjusted pumps</span><strong>${summary.adjustedPumps.toFixed(2)}</strong></div>
+          <div class="metric"><span>Pop rate</span><strong>${(summary.popRate * 100).toFixed(1)}%</strong></div>
+          <div class="metric"><span>Average cash-out points</span><strong>${summary.averageCashOut.toFixed(2)}</strong></div>
+          <div class="metric"><span>${summary.key === "individual" ? "Total score" : "Team score impact"}</span><strong>${summary.totalScore.toFixed(2)}</strong></div>
+        `;
+        summaryGrid.appendChild(card);
+      });
+    }
+
+    function renderInsight() {
+      if (!realTrials.length) {
+        insightBox.textContent = "Complete the three real rounds to generate an interpretation.";
+        return;
+      }
+
+      const individual = summaries.find((summary) => summary.key === "individual");
+      const small = summaries.find((summary) => summary.key === "small_group");
+      const large = summaries.find((summary) => summary.key === "large_group");
+      const highestAdjusted = [...summaries].sort((a, b) => b.adjustedPumps - a.adjustedPumps)[0];
+      const safest = [...summaries].sort((a, b) => a.popRate - b.popRate)[0];
+
+      let socialInterpretation = "Your risk-taking stayed relatively stable across the three conditions.";
+
+      if (small.adjustedPumps > individual.adjustedPumps + 0.75 && large.adjustedPumps > individual.adjustedPumps + 0.75) {
+        socialInterpretation = "You made riskier choices when your decisions affected a shared group outcome than when only your own score was at stake.";
+      } else if (small.adjustedPumps < individual.adjustedPumps - 0.75 && large.adjustedPumps < individual.adjustedPumps - 0.75) {
+        socialInterpretation = "You became more cautious when your decisions affected a shared group outcome.";
+      } else if (large.adjustedPumps > small.adjustedPumps + 0.75) {
+        socialInterpretation = "The larger shared-responsibility group appears to have shifted you toward slightly riskier choices.";
+      }
+
+      insightBox.textContent = `${socialInterpretation} Your highest adjusted-pump condition was ${highestAdjusted.label} (${highestAdjusted.adjustedPumps.toFixed(2)}), while ${safest.label} showed your lowest pop rate (${(safest.popRate * 100).toFixed(1)}%). In the group rounds, positive totals reflect helping the team more than hurting it.`;
+    }
+
+    function renderChart() {
+      const canvas = document.getElementById("histogram-chart");
+      if (!realTrials.length) {
+        return;
+      }
+
+      const maxPump = Math.max(1, ...realTrials.map((trial) => trial.pumps));
+      const labels = Array.from({ length: maxPump + 1 }, (_, index) => String(index));
+
+      const datasets = CONDITIONS.map((condition) => {
+        const data = labels.map((label) => {
+          const pumpValue = Number(label);
+          return realTrials.filter(
+            (trial) => trial.condition === condition.key && trial.pumps === pumpValue
+          ).length;
+        });
+
+        return {
+          label: condition.label,
+          data,
+          backgroundColor: condition.color,
+          borderRadius: 6
+        };
+      });
+
+      new Chart(canvas, {
+        type: "bar",
+        data: {
+          labels,
+          datasets
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "bottom"
+            }
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: "Pump Count"
+              }
+            },
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: "Frequency"
+              },
+              ticks: {
+                precision: 0
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function resetForRestart() {
+      localStorage.removeItem("bartActiveStage");
+      localStorage.removeItem("bartSessionInfo");
+      localStorage.removeItem("bartActiveRoundTrials");
+      localStorage.removeItem("bartTrials");
+      localStorage.removeItem("bartRoundSummaries");
+      localStorage.setItem("bartPracticeComplete", "false");
+      localStorage.setItem("bartRoundIndex", "0");
+      localStorage.setItem("bartCurrentCondition", "practice");
+      localStorage.setItem("bartCurrentRound", "0");
+      window.location.href = "./start.html";
+    }
+
+    restartButton.addEventListener("click", resetForRestart);
+    homeButton.addEventListener("click", () => {
+      window.location.href = "./index.html";
+    });
+
+    renderSummaries();
+    renderInsight();
+    renderChart();
+  </script>
+</body>
+</html>

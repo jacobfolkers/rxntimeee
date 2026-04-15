@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prepare the Next Stage</title>
+  <style>
+    :root {
+      --bg: #f5efe7;
+      --panel: rgba(255, 251, 246, 0.94);
+      --ink: #1f2623;
+      --muted: #66726d;
+      --line: #ddd5ca;
+      --accent: #9a3412;
+      --accent-soft: rgba(154, 52, 18, 0.1);
+      --shadow: 0 24px 56px rgba(31, 26, 22, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 24px;
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top right, rgba(154, 52, 18, 0.12), transparent 28%),
+        radial-gradient(circle at bottom left, rgba(53, 89, 74, 0.1), transparent 28%),
+        linear-gradient(180deg, #fcfaf6 0%, var(--bg) 100%);
+      display: grid;
+      place-items: center;
+    }
+
+    .panel {
+      width: min(100%, 880px);
+      background: var(--panel);
+      border: 1px solid rgba(221, 213, 202, 0.9);
+      border-radius: 30px;
+      padding: 32px;
+      box-shadow: 0 24px 56px rgba(31, 26, 22, 0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    .eyebrow {
+      margin: 0 0 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(2rem, 4.8vw, 3.6rem);
+      line-height: 1.02;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      margin: 24px 0;
+    }
+
+    .meta-card,
+    .focus-card,
+    .status-card {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.75);
+      padding: 18px;
+    }
+
+    .meta-card strong,
+    .focus-card strong,
+    .status-card strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 0.8rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .highlight {
+      margin-top: 18px;
+      border-radius: 22px;
+      border: 1px solid rgba(154, 52, 18, 0.18);
+      background: var(--accent-soft);
+      padding: 18px;
+      color: #7b2d12;
+    }
+
+    .checklist {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--ink);
+      line-height: 1.7;
+    }
+
+    .status-card {
+      margin-top: 18px;
+      min-height: 110px;
+    }
+
+    .spinner {
+      width: 34px;
+      height: 34px;
+      margin-top: 16px;
+      border-radius: 50%;
+      border: 3px solid rgba(154, 52, 18, 0.16);
+      border-top-color: var(--accent);
+      animation: spin 0.9s linear infinite;
+      display: none;
+    }
+
+    .spinner.active {
+      display: block;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 15px 22px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.16s ease, filter 0.16s ease, opacity 0.16s ease;
+    }
+
+    .primary {
+      background: linear-gradient(135deg, #9a3412, #c2410c);
+      color: #fff;
+      box-shadow: 0 14px 26px rgba(154, 52, 18, 0.2);
+    }
+
+    .secondary {
+      background: #fff;
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-1px);
+      filter: brightness(1.03);
+    }
+
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .error {
+      color: #8b132f;
+      background: rgba(225, 29, 72, 0.08);
+      border-color: rgba(225, 29, 72, 0.18);
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 12px;
+      }
+
+      .panel {
+        padding: 22px;
+      }
+
+      .actions {
+        display: grid;
+      }
+
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="panel">
+    <p class="eyebrow">Stage Setup</p>
+    <h1 id="title">Preparing your next step</h1>
+    <p id="description">
+      The session uses one short practice block followed by three main rounds.
+    </p>
+
+    <section class="meta-grid">
+      <article class="meta-card">
+        <strong>Participant</strong>
+        <span id="participant-name">-</span>
+      </article>
+      <article class="meta-card">
+        <strong>Stage</strong>
+        <span id="stage-name">-</span>
+      </article>
+      <article class="meta-card">
+        <strong>Condition</strong>
+        <span id="condition-name">-</span>
+      </article>
+      <article class="meta-card">
+        <strong>Group Size</strong>
+        <span id="group-size">-</span>
+      </article>
+    </section>
+
+    <section class="focus-card">
+      <strong>What to expect</strong>
+      <ul class="checklist" id="checklist"></ul>
+    </section>
+
+    <section class="highlight" id="highlight"></section>
+
+    <section class="status-card" id="status-card">
+      <strong>Status</strong>
+      <div id="status-text">Ready when you are.</div>
+      <div class="spinner" id="spinner"></div>
+    </section>
+
+    <div class="actions">
+      <button class="primary" id="primary-button">Continue</button>
+      <button class="secondary" id="reset-button" type="button">Start Over</button>
+    </div>
+  </main>
+
+  <script>
+    const ROUND_SEQUENCE = [
+      {
+        roundNumber: 1,
+        condition: "individual",
+        label: "Round 1",
+        conditionLabel: "Individual",
+        targetSize: 1,
+        companionCount: 0
+      },
+      {
+        roundNumber: 2,
+        condition: "small_group",
+        label: "Round 2",
+        conditionLabel: "Small Group",
+        targetSize: 3,
+        companionCount: 2
+      },
+      {
+        roundNumber: 3,
+        condition: "large_group",
+        label: "Round 3",
+        conditionLabel: "Large Group",
+        targetSize: 6,
+        companionCount: 5
+      }
+    ];
+
+    const PRACTICE_STAGE = {
+      type: "practice",
+      roundNumber: 0,
+      label: "Practice Block",
+      condition: "practice",
+      conditionLabel: "Practice",
+      targetSize: 1,
+      companionCount: 0,
+      trialsPerRound: 4
+    };
+
+    const participant = JSON.parse(localStorage.getItem("bartParticipant") || "null");
+    const questionnaire = JSON.parse(localStorage.getItem("bartQuestionnaire") || "null");
+    const practiceComplete = localStorage.getItem("bartPracticeComplete") === "true";
+    const roundIndex = Number(localStorage.getItem("bartRoundIndex") || "0");
+    const currentRound = ROUND_SEQUENCE[roundIndex] || null;
+    const pendingGroupIntro = localStorage.getItem("bartPendingGroupIntro") === "true";
+
+    if (!participant || !questionnaire) {
+      window.location.href = "./index.html";
+    }
+
+    if (!participant || !questionnaire) {
+      document.body.innerHTML = `
+        <main class="panel">
+          <p class="eyebrow">Stage Setup</p>
+          <h1>Setup data missing</h1>
+          <p>Please return to the entry page and start the experiment again.</p>
+          <div class="actions">
+            <button class="primary" onclick="window.location.href='./index.html'">Back to Entry Page</button>
+          </div>
+        </main>
+      `;
+      throw new Error("Missing participant setup data.");
+    }
+
+    const participantName = document.getElementById("participant-name");
+    const stageName = document.getElementById("stage-name");
+    const conditionName = document.getElementById("condition-name");
+    const groupSize = document.getElementById("group-size");
+    const title = document.getElementById("title");
+    const description = document.getElementById("description");
+    const checklist = document.getElementById("checklist");
+    const highlight = document.getElementById("highlight");
+    const statusCard = document.getElementById("status-card");
+    const statusText = document.getElementById("status-text");
+    const spinner = document.getElementById("spinner");
+    const primaryButton = document.getElementById("primary-button");
+    const resetButton = document.getElementById("reset-button");
+
+    let stage = null;
+
+    function seeded(seedText) {
+      let seed = 0;
+      for (let index = 0; index < seedText.length; index += 1) {
+        seed = (seed * 31 + seedText.charCodeAt(index)) >>> 0;
+      }
+      return () => {
+        seed = (1664525 * seed + 1013904223) >>> 0;
+        return seed / 4294967296;
+      };
+    }
+
+    function randomAliases(count, seedText) {
+      const random = seeded(seedText);
+      const labels = [];
+      const used = new Set();
+
+      while (labels.length < count) {
+        const label = `Player ${Math.floor(1000 + random() * 9000)}`;
+        if (!used.has(label) && label !== participant.displayName) {
+          labels.push(label);
+          used.add(label);
+        }
+      }
+
+      return labels;
+    }
+
+    function updateStatus(message, isError = false, busy = false) {
+      statusText.textContent = message;
+      statusCard.classList.toggle("error", isError);
+      spinner.classList.toggle("active", busy);
+      primaryButton.disabled = busy;
+    }
+
+    function buildSimulatedPlayers(stagePayload) {
+      const missingCount = Math.max(0, stagePayload.targetSize - 1);
+      if (missingCount === 0) {
+        return [];
+      }
+
+      const names = randomAliases(missingCount, `${participant.participantId}:${stagePayload.condition}:${stagePayload.roundNumber}`);
+      return names.map((displayName, index) => ({
+        id: `sim-${stagePayload.condition}-${stagePayload.roundNumber}-${index + 1}`,
+        displayName,
+        joinedAt: Date.now() + index + 1,
+        currentTrial: 1,
+        score: 0,
+        currentHeat: 0,
+        currentPoints: 0,
+        status: "Waiting",
+        lastEvent: "joined the session",
+        lastEventAt: Date.now()
+      }));
+    }
+
+    function writeStage(stagePayload) {
+      const payload = {
+        ...stagePayload,
+        simulatedPlayers: buildSimulatedPlayers(stagePayload)
+      };
+
+      localStorage.setItem("bartActiveStage", JSON.stringify(payload));
+      localStorage.setItem("bartCurrentCondition", payload.condition);
+      localStorage.setItem("bartCurrentRound", String(payload.roundNumber));
+      localStorage.setItem("bartActiveRoundTrials", "[]");
+      localStorage.setItem("bartSessionInfo", JSON.stringify(payload));
+    }
+
+    function configureScreen() {
+      participantName.textContent = participant.displayName;
+
+      if (!practiceComplete) {
+        stage = { ...PRACTICE_STAGE };
+        title.textContent = "Practice first";
+        description.textContent = "This short practice block helps you learn the balloon controls before the main rounds begin.";
+        stageName.textContent = stage.label;
+        conditionName.textContent = stage.conditionLabel;
+        groupSize.textContent = "Just you";
+        highlight.textContent = "The practice block does not count toward your final summary and does not include the participant display panel.";
+        checklist.innerHTML = `
+          <li>Complete a short set of practice trials.</li>
+          <li>Learn how pumping, popping, and collecting points work.</li>
+          <li>Move into Round 1 automatically when practice ends.</li>
+        `;
+        primaryButton.textContent = "Begin Practice";
+        return;
+      }
+
+      if (!currentRound) {
+        window.location.href = "./results.html";
+        return;
+      }
+
+      stage = {
+        type: "round",
+        ...currentRound,
+        trialsPerRound: 8
+      };
+
+      if (pendingGroupIntro && stage.roundNumber === 2) {
+        title.textContent = "Next phase: group rounds";
+        stageName.textContent = "Group Placement";
+        conditionName.textContent = "Shared Group Conditions";
+        groupSize.textContent = "Upcoming group rounds";
+        description.textContent = "You have finished the individual round. You will now be placed into group conditions for the remaining rounds.";
+        highlight.textContent = "From this point on, your decisions can affect a shared team score.";
+        checklist.innerHTML = `
+          <li>The next rounds place you into visible group settings.</li>
+          <li>Your cash-outs can help a shared team total.</li>
+          <li>Pops can reduce that same team total.</li>
+          <li>Continue when you are ready to enter the group phase.</li>
+        `;
+        primaryButton.textContent = "Continue to Groups";
+        return;
+      }
+
+      title.textContent = `${stage.label}: ${stage.conditionLabel}`;
+      stageName.textContent = stage.label;
+      conditionName.textContent = stage.conditionLabel;
+      groupSize.textContent = `${stage.targetSize} participant${stage.targetSize === 1 ? "" : "s"}`;
+
+      if (stage.condition === "individual") {
+        description.textContent = "You will complete this round on your own. No participant panel or session display will be shown during this round.";
+        highlight.textContent = "Focus on the balloon and your own score during this round.";
+        checklist.innerHTML = `
+          <li>Work through the balloon task on your own.</li>
+          <li>No other players will appear on screen.</li>
+          <li>Each trial is timed, so decisions still need to be made promptly.</li>
+          <li>Complete the round and move on when finished.</li>
+        `;
+        primaryButton.textContent = "Start Round 1";
+      } else {
+        description.textContent = `You will now complete this round alongside ${stage.companionCount} other participants. Everyone contributes to one shared team score, so your choices can help or hurt the full group total.`;
+        highlight.textContent = stage.condition === "large_group"
+          ? "Your round status will appear on the session display."
+          : "In this round, successful cash-outs help the team and pops can reduce the shared score.";
+        checklist.innerHTML = `
+          <li>See a visible participant panel, shared team score, and activity updates during the round.</li>
+          <li>Your successful cash-outs add points to the team total.</li>
+          <li>Pops can reduce the shared score for everyone.</li>
+          <li>Each trial is timed, so waiting too long can end the decision for you.</li>
+          <li>Save your own trial data as one clean batch at the end of the round.</li>
+        `;
+        primaryButton.textContent = `Start ${stage.conditionLabel}`;
+      }
+    }
+
+    async function continueFlow() {
+      if (pendingGroupIntro && stage?.roundNumber === 2) {
+        localStorage.removeItem("bartPendingGroupIntro");
+        window.location.href = "./start.html";
+        return;
+      }
+
+      if (stage.type === "practice") {
+        writeStage({
+          ...stage,
+          sessionId: `practice-${participant.participantId}`,
+          participantCount: 1,
+          humanCount: 1,
+          simulatedCount: 0
+        });
+        window.location.href = "./bart.html";
+        return;
+      }
+
+      if (stage.condition === "individual") {
+        writeStage({
+          ...stage,
+          sessionId: `solo-${stage.condition}-${participant.participantId}-${Date.now()}`,
+          participantCount: 1,
+          humanCount: 1,
+          simulatedCount: 0
+        });
+        window.location.href = "./bart.html";
+        return;
+      }
+
+      updateStatus("Preparing the group context...", false, true);
+
+      window.setTimeout(() => {
+        writeStage({
+          ...stage,
+          sessionId: `group-${stage.condition}-${participant.participantId}-${Date.now()}`,
+          participantCount: stage.targetSize,
+          humanCount: 1,
+          simulatedCount: stage.targetSize - 1
+        });
+        updateStatus("Session ready. Opening the task now...", false, false);
+        window.setTimeout(() => {
+          window.location.href = "./bart.html";
+        }, 450);
+      }, 1400);
+    }
+
+    function resetExperiment() {
+      localStorage.removeItem("bartActiveStage");
+      localStorage.removeItem("bartSessionInfo");
+      localStorage.removeItem("bartActiveRoundTrials");
+      localStorage.removeItem("bartTrials");
+      localStorage.removeItem("bartRoundSummaries");
+      localStorage.setItem("bartRoundIndex", "0");
+      localStorage.setItem("bartPracticeComplete", "false");
+      localStorage.setItem("bartCurrentCondition", "practice");
+      localStorage.setItem("bartCurrentRound", "0");
+      localStorage.removeItem("bartPendingGroupIntro");
+      window.location.href = "./index.html";
+    }
+
+    configureScreen();
+    updateStatus("Ready when you are.");
+
+    primaryButton.addEventListener("click", () => {
+      continueFlow().catch((error) => {
+        console.error(error);
+        updateStatus("Something went wrong while preparing the next stage. Please refresh and try again.", true, false);
+      });
+    });
+
+    resetButton.addEventListener("click", resetExperiment);
+  </script>
+</body>
+</html>
